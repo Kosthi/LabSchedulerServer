@@ -1,3 +1,6 @@
+insert into calendar(year, semester, start_date, active)
+values (2023, '1', '2023-8-21', true);
+
 insert into school(school_name)
 values ('机械工程学院'),
        ('材料科学与工程学院'),
@@ -39,7 +42,14 @@ values ('103', 4),
        ('345', 4),
        ('418', 4),
        ('419', 4),
-       ('545', 4);
+       ('545', 4),
+       ('123', 3),
+       ('229', 3),
+       ('222', 3),
+       ('444', 3),
+       ('121', 2),
+       ('224', 2),
+       ('111', 2);
 
 insert into major(major_code, major_name, school_id)
 VALUES ('0401', '测控技术与仪器', 4),
@@ -52,7 +62,7 @@ VALUES ('0401', '测控技术与仪器', 4),
        ('0302', '自动化', 3),
        ('0303', '生物医学工程', 3);
 
-insert into teacher (teacher_id, teacher_name, school_id, password, limits)
+insert into teacher (teacher_code, teacher_name, school_id, password, limits)
 values ('00001', '修**', 4, 'e10adc3949ba59abbe56e057f20f883e', false),
        ('00002', '樊**', 4, 'e10adc3949ba59abbe56e057f20f883e', false),
        ('00003', '秦**', 4, 'e10adc3949ba59abbe56e057f20f883e', false),
@@ -163,13 +173,22 @@ values ('00001', '修**', 4, 'e10adc3949ba59abbe56e057f20f883e', false),
        ('15202', '马**', 4, 'e10adc3949ba59abbe56e057f20f883e', false),
        ('15203', '刘**', 4, 'e10adc3949ba59abbe56e057f20f883e', false);
 
-insert into course (course_code, course_name, course_hour, major_id, school_id)
-values ('04204', '计算机网络', '64', 5, 4),
-       ('04188', 'Java程序设计', '64', 5, 4),
-       ('04172', '软件工程', '20', 5, 4),
-       ('04348', '计算机科技外语', '12', 5, 4),
-       ('04363', '微机原理与接口技术', '12', 5, 4),
-       ('04255', 'Linux操作系统', '8', 5, 4);
+insert into course (course_code, course_name, course_hour)
+values ('04204', '计算机网络', '64'),
+       ('04188', 'Java程序设计', '64'),
+       ('04172', '软件工程', '20'),
+       ('04348', '计算机科技外语', '12'),
+       ('04363', '微机原理与接口技术', '12'),
+       ('04255', 'Linux操作系统', '8');
+
+insert into course_major(course_id, major_id)
+values (1, 5),
+       (2, 5),
+       (3, 5),
+       (4, 5),
+       (5, 5),
+       (6, 5),
+       (5, 7);
 
 insert into class(class_name, major_id, year)
 VALUES ('1', 5, 2020),
@@ -203,3 +222,30 @@ Values (1, 1),
        (5, 2),
        (5, 3),
        (5, 5);
+
+insert into lab_schedule(calendar_id, week, weekday, session, lab_id, course_id, major_id, note)
+VALUES (1, '19', '1', '1', 9, 1, 5, '计算机网络'),
+       (1, '19', '1', '2', 9, 1, 2, '计算机网络'),
+       (1, '19', '1', '3', 2, 3, 5, '软件工程'),
+       (1, '19', '1', '4', 1, 1, 6, '计算机网络'),
+       (1, '19', '1', '5', 9, 3, 5, '软件工程'),
+       (1, '19', '3', '2', 3, 1, 4, '计算机网络');
+
+insert into lab_schedule_teacher(schedule_id, teacher_id)
+VALUES (1, 1),
+       (1, 2),
+       (2, 3),
+       (3, 4),
+       (4, 2),
+       (5, 2),
+       (6, 2);
+
+insert into lab_schedule_class(schedule_id, class_id)
+VALUES (1, 1),
+       (1, 2),
+       (2, 3),
+       (2, 4),
+       (3, 4),
+       (4, 2),
+       (5, 2),
+       (6, 2);

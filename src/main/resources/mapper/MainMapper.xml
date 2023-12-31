@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kosthi.labschedulerserver.mapper.MainMapper">
+    <!--    <resultMap id="UserResultMap" type="User">-->
+    <!--        <result property="account" column="account"/>-->
+    <!--        <result property="password" column="password"/>-->
+    <!--        <result property="username" column="username"/>-->
+    <!--        <result property="sex" column="sex"/>-->
+    <!--        <result property="age" column="age"/>-->
+    <!--        <result property="telephone" column="telephone"/>-->
+    <!--        <result property="address" column="address"/>-->
+    <!--        <result property="label" column="label"/>-->
+    <!--        <result property="head" column="head"/>-->
+    <!--        <result property="background" column="background"/>-->
+    <!--    </resultMap>-->
+
+    <select id="getStartDate" resultType="java.sql.Date">
+        SELECT start_date
+        FROM calendar
+        WHERE active = true
+    </select>
+
+    <select id="getSchoolLabsMap" resultType="SchoolLab">
+        SELECT s.school_name                          AS schoolName,
+               GROUP_CONCAT(l.lab_name SEPARATOR ',') AS labsName
+        FROM school s
+                 JOIN lab l ON s.id = l.school_id
+        GROUP BY s.school_name
+    </select>
+
+    <!--得到排课id、星期几、节次、课程id、备注-->
+    <select id="getSchedule" resultType="Schedule">
+        SELECT ls.id, ls.weekday AS weekDay, ls.session, ls.course_id AS courseId, ls.major_id AS majorId, ls.note
+        FROM lab_schedule ls
+                 JOIN calendar c ON c.id = ls.calendar_id
+                 JOIN lab ON lab.id = ls.lab_id
+                 JOIN school ON school.id = lab.school_id
+        WHERE c.active = TRUE
+          AND ls.week = #{week}
+          AND ls.`lock` = '1'
+          AND school.school_name = #{schoolName}
+          AND lab.lab_name = #{labName}
+        ORDER BY weekday, ls.session
+    </select>
+
+    <!--通过排课id得到教师名-->
+    <select id="getTeacherNameByScheduleId" resultType="String">
+        select teacher_name
+        from teacher
+                 JOIN lab_schedule_teacher on teacher.id = lab_schedule_teacher.teacher_id
+        where lab_schedule_teacher.schedule_id = #{scheduleId}
+    </select>
+
+    <!--通过课程id得到课程名-->
+    <select id="getCourseNameByCourseId" resultType="String">
+        select course_name
+        from course c
+        where c.id = #{courseId}
+    </select>
+
+    <!--通过专业id得到专业名-->
+    <select id="getMajorNameByMajorId" resultType="String">
+        select major_name
+        from major m
+        where m.id = #{majorId}
+    </select>
+
+    <!--通过排课id班级、年级-->
+    <select id="getClassYearInfoByScheduleId" resultType="ClassYearInfo">
+        select class_name AS className, year
+        from class
+                 JOIN lab_schedule_class lab_c on lab_c.class_id = class.id
+        where lab_c.schedule_id = #{schedule}
+    </select>
+</mapper>
