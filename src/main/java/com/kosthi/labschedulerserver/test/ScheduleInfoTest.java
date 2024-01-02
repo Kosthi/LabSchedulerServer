@@ -1,7 +1,5 @@
 package com.kosthi.labschedulerserver.test;
 
-import com.kosthi.labschedulerserver.dto.ScheduleInfo;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,14 +19,13 @@ public class ScheduleInfoTest {
         yearList.add(2022);
         yearList.add(2021);
 
-        ScheduleInfo scheduleInfo = ScheduleInfo.builder()
-                .teachersName(teacherList)
-                .courseName("数据库与软件工程课程设计")
-                .majorName("计算机科学与技术")
-                .year(yearList)
-                .className(classList)
-                .note("无")
-                .build();
-        System.out.println(scheduleInfo);
+//        ScheduleInfo scheduleInfo = ScheduleInfo.builder()
+//                .teachersName(teacherList)
+//                .courseName("数据库与软件工程课程设计")
+//                .majorName("计算机科学与技术")
+//                .classYearInfos()
+//                .note("无")
+//                .build();
+//        System.out.println(scheduleInfo);
     }
 }

@@ -2,6 +2,18 @@
 
 set foreign_key_checks = false;
 
+DROP TABLE IF EXISTS admin;
+
+create table admin
+(
+    id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    account      char(5)  not null,
+    password     char(32) not null,
+    gmt_create   datetime default CURRENT_TIMESTAMP,
+    gmt_modified datetime default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+    UNIQUE (account)
+);
+
 DROP TABLE IF EXISTS calendar;
 
 create table calendar
@@ -68,6 +80,7 @@ create table teacher
 DROP TABLE IF EXISTS teacher_course;
 
 # 多个老师教多门课程
+# 一个老师教某个学院某个专业某个年级的某个班
 create table teacher_course
 (
     id           int unsigned auto_increment primary key,
@@ -77,6 +90,20 @@ create table teacher_course
     gmt_modified datetime default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
     foreign key (teacher_id) REFERENCES teacher (id),
     foreign key (course_id) REFERENCES course (id)
+);
+
+DROP TABLE IF EXISTS teacher_class;
+
+# 由老师教的classId确定专业年级班级，再由专业Id确认学院 major(schoolId)
+create table teacher_class
+(
+    id           int unsigned auto_increment primary key,
+    teacher_id   int unsigned not null,
+    class_id     int unsigned not null,
+    gmt_create   datetime default CURRENT_TIMESTAMP,
+    gmt_modified datetime default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+    foreign key (teacher_id) REFERENCES teacher (id),
+    foreign key (class_id) REFERENCES class (id)
 );
 
 DROP TABLE IF EXISTS school;
@@ -195,6 +222,7 @@ create table major
 
 DROP TABLE IF EXISTS class;
 
+# 确定xx专业xx年级xx班
 create table class
 (
     id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

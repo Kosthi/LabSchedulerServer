@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kosthi.labschedulerserver.mapper.LoginMapper">
+    <select id="checkIfUserExists" resultType="Boolean">
+        SELECT CASE
+                   WHEN EXISTS (SELECT 1
+                                FROM admin
+                                WHERE account = #{account}) THEN TRUE
+                   WHEN EXISTS (SELECT 1
+                                FROM teacher
+                                WHERE teacher_code = #{account}) THEN TRUE
+                   ELSE FALSE
+                   END
+    </select>
+
+    <select id="findUserByAccount" resultType="User">
+        (SELECT account, password, true AS isAdmin
+         FROM admin
+         WHERE account = #{account})
+        UNION ALL
+        (SELECT teacher_code AS account, password, false AS isAdmin
+         FROM teacher
+         WHERE teacher_code = #{account}
+         LIMIT 1)
+        LIMIT 1;
+    </select>
+
+    <!--找到老师名字-->
+    <select id="updateTeacherStatus" resultType="Boolean">
+        UPDATE teacher
+        SET limits = #{isLogin}
+        WHERE teacher_code = #{account}
+    </select>
+
+    <!--找到老师名字-->
+    <select id="findTeacherNameByAccount" resultType="String">
+        SELECT teacher_name
+        FROM teacher
+        WHERE teacher_code = #{account}
+    </select>
+
+    <!--找到老师所属学院-->
+    <select id="findSchoolNameByAccount" resultType="String">
+        SELECT school_name
+        FROM school
+                 JOIN teacher ON school.id = teacher.school_id
+        WHERE teacher_code = #{account}
+    </select>
+
+    <!--找到所有教的课对应的学院，先通过account找到教师再找教的课再找课程对应的专业再由专业找学院，最后group去重-->
+    <select id="querySchoolTeachNameByAccount" resultType="String">
+        SELECT s.school_name
+        FROM school s
+                 JOIN teacher ON s.id = teacher.school_id
+                 JOIN teacher_course tc on tc.teacher_id = teacher.id
+                 JOIN course_major cm on cm.course_id = tc.course_id
+                 JOIN major m on m.id = cm.major_id AND s.id = m.school_id
+        WHERE teacher_code = #{account}
+        GROUP BY s.school_name
+    </select>
+
+    <!--找到所教该学院教授所有专业，去重-->
+    <select id="queryMajorTeachByAccountAndSchoolName" resultType="String">
+        SELECT m.major_name
+        FROM school s
+                 JOIN teacher ON s.id = teacher.school_id
+                 JOIN teacher_course tc on tc.teacher_id = teacher.id
+                 JOIN course_major cm on cm.course_id = tc.course_id
+                 JOIN major m on m.id = cm.major_id AND s.id = m.school_id
+        WHERE teacher_code = #{account}
+          AND s.school_name = #{schoolName}
+        GROUP BY m.major_name
+    </select>
+
+    <!--找到所教该学院教授该专业的所有课程，去重-->
+    <select id="queryCourseTeachByAccountAndSchoolNameAndMajorName" resultType="String">
+        SELECT c.course_name
+        FROM school s
+                 JOIN teacher ON s.id = teacher.school_id
+                 JOIN teacher_course tc on tc.teacher_id = teacher.id
+                 JOIN course_major cm on cm.course_id = tc.course_id
+                 JOIN major m on m.id = cm.major_id AND s.id = m.school_id
+                 JOIN course c on cm.course_id = c.id
+        WHERE teacher_code = #{account}
+          AND s.school_name = #{schoolName}
+          AND m.major_name = #{majorName}
+        GROUP BY c.course_name
+    </select>
+
+    <!--找到所教该学院教授的该专业的某课程的所有班级，去重-->
+    <!--这里添加了是否已经毕业的判断-->
+    <select id="queryClassTeachByAccountAndSchoolNameAndMajorNameByCourseName" resultType="ClassYearInfo">
+        SELECT c.class_name AS className, c.year
+        FROM school s
+                 JOIN teacher ON s.id = teacher.school_id
+                 JOIN teacher_course tc on tc.teacher_id = teacher.id
+                 JOIN teacher_class t on teacher.id = t.teacher_id
+                 JOIN class c on t.class_id = c.id
+            # 由教的班级找到教的学院
+                 JOIN major m on c.major_id = m.id AND m.school_id = s.id
+                 JOIN course on tc.course_id = course.id
+        WHERE teacher_code = #{account}
+          AND s.school_name = #{schoolName}
+          AND m.major_name = #{majorName}
+          AND course.course_name = #{courseName}
+          AND DATE_ADD(STR_TO_DATE(CONCAT(c.year, '-01-01'), '%Y-%m-%d'), INTERVAL '4-6' YEAR_MONTH) > CURRENT_DATE()
+        GROUP BY className, c.year
+    </select>
+
+</mapper>

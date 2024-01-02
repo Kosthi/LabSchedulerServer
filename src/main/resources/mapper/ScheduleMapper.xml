@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kosthi.labschedulerserver.mapper.ScheduleMapper">
+
+    <select id="getTeacherIdByAccount" resultType="Long">
+        select id
+        from teacher
+        WHERE teacher_code = #{account}
+    </select>
+
+    <select id="getCalendarIdByYearAndSemester" resultType="Long">
+        select id
+        from calendar
+        WHERE year = #{year}
+          AND semester = #{semester}
+          AND active = true
+    </select>
+
+    <select id="getClassIdByYearAndClassName" resultType="Long">
+        select id
+        from class
+        WHERE year = #{year}
+          AND class_name = #{className}
+    </select>
+
+    <!--(schoolId+labName) -> labId-->
+    <select id="getLabIdBySchoolNameAndLabName" resultType="Long">
+        select lab.id
+        from lab
+                 JOIN school s on s.id = lab.school_id
+        WHERE school_name = #{schoolName}
+          AND lab_name = #{labName}
+    </select>
+
+    <!--一门课程课程id唯一-->
+    <select id="getCourseIdByCourseName" resultType="Long">
+        select course.id
+        from course
+        where course_name = #{courseName}
+    </select>
+
+    <select id="getMajorIdByYearAndClassName" resultType="Long">
+        select major_id
+        from class
+        where year = #{year}
+          AND class_name = #{className};
+    </select>
+
+    <!--添加一次排课记录，同时返回id，下面3个都要执行-->
+    <insert id="addSchedule" useGeneratedKeys="true" keyProperty="id">
+        insert into lab_schedule (calendar_id, week, weekday, session, lab_id, course_id, major_id, note)
+        VALUES (#{calendarId}, #{week}, #{weekDay}, #{session}, #{labId}, #{courseId}, #{majorId}, #{note})
+    </insert>
+
+    <!--一次排课对应多个班级-->
+    <insert id="addScheduleClass">
+        insert into lab_schedule_class(schedule_id, class_id)
+        VALUES (#{scheduleId}, #{classId})
+    </insert>
+
+    <!--一次排课对应多个老师-->
+    <insert id="addScheduleTeacher">
+        insert into lab_schedule_teacher(schedule_id, teacher_id)
+        VALUES (#{scheduleId}, #{teacherId})
+    </insert>
+
+</mapper>
